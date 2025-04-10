@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "harddrive",
+	"version": "0.1a",
+	"name": "Hard drive",
+	"description": "Mod for simple storing files in your world.",
+	"authors": [
+		"ScalpelRed"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": ""
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/harddrive/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.scalpelred.harddrive.HardDrive"
+		],
+		"client": [
+			"com.scalpelred.harddrive.HardDriveClient"
+		]
+	},
+	"mixins": [
+		"harddrive.mixins.json",
+		{
+			"config": "harddrive.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
