@@ -15,11 +15,11 @@ public class WorldIO {
     private final int LONG_WAIT_NOTE_RATE = 0x1FFFF; // 128 KB
 
     private final HardDrive hardDrive;
-    private final PlacementConfig placementConfig;
+    private final HardDriveConfig config;
 
     public WorldIO(HardDrive hardDrive) {
         this.hardDrive = hardDrive;
-        this.placementConfig = hardDrive.placementConfig;
+        this.config = hardDrive.config;
     }
 
     public boolean WriteToWorld(WorldAccess world, BlockPos pos, File file)
@@ -37,11 +37,11 @@ public class WorldIO {
 
             // for some reason I like to compare these two branches to x86's protected and real modes
             // (nothing similar, actually)
-            boolean addLength = placementConfig.addLength.getValue();
+            boolean addLength = config.addLength.getValue();
             if (addLength) {
-                sizeX = placementConfig.sizeX.getValue();
-                sizeZ = placementConfig.sizeZ.getValue();
-                sizeY = placementConfig.sizeY.getValue();
+                sizeX = config.sizeX.getValue();
+                sizeZ = config.sizeZ.getValue();
+                sizeY = config.sizeY.getValue();
                 long volume = (long)sizeX * sizeZ * sizeY;
                 long length = file.length();
 
@@ -64,16 +64,16 @@ public class WorldIO {
                 bytesRead = f.read(buffer, 0, buffer.length);
                 if (bytesRead == -1) return true; // no data, leaving
 
-                sizeX = placementConfig.sizeX.getValue();
-                sizeZ = placementConfig.sizeZ.getValue();
-                sizeY = placementConfig.sizeY.getValue();
+                sizeX = config.sizeX.getValue();
+                sizeZ = config.sizeZ.getValue();
+                sizeY = config.sizeY.getValue();
             }
             currentByteIndex = 0;
             long totalBytes = 0;
 
             BlockState block0 = Blocks.GREEN_STAINED_GLASS.getDefaultState();
             BlockState block1 = Blocks.REDSTONE_BLOCK.getDefaultState();
-            int yStep = placementConfig.addLayerSpacing.getValue() ? 9 : 8;
+            int yStep = config.addLayerSpacing.getValue() ? 9 : 8;
 
             BlockPos.Mutable cpos = pos.mutableCopy();
             for (int y = 0; y < sizeY; y++) {

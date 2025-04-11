@@ -3,7 +3,7 @@ package com.scalpelred.harddrive;
 import com.scalpelred.mcmodutil.Config;
 import com.scalpelred.mcmodutil.ConfigEntryHandle;
 
-public class PlacementConfig extends Config {
+public class HardDriveConfig extends Config {
 
     public ConfigEntryHandle<Integer> sizeX = new ConfigEntryHandle<>(
             "size_x", Integer.class, 16, "Number of X rows");
@@ -16,8 +16,8 @@ public class PlacementConfig extends Config {
     public ConfigEntryHandle<Boolean> addLayerSpacing = new ConfigEntryHandle<>(
             "add_layer_spacing", Boolean.class, false, "Add one block between Y layers");
 
-    public PlacementConfig(HardDrive hardDrive) {
-        super(hardDrive.logger, "placement", true);
+    public HardDriveConfig(HardDrive hardDrive) {
+        super(hardDrive.logger, "main", false);
 
         registerEntryHandle(sizeX);
         registerEntryHandle(sizeZ);

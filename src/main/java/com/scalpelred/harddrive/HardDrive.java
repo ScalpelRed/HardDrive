@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class HardDrive implements ModInitializer {
 
     public final Logger logger = LoggerFactory.getLogger("harddrive");
-	public final PlacementConfig placementConfig = new PlacementConfig(this);
+	public final HardDriveConfig config = new HardDriveConfig(this);
 	public final WorldIO worldIO = new WorldIO(this);
 
 	@Override
@@ -19,7 +19,7 @@ public class HardDrive implements ModInitializer {
 		else spl = "oOwOo " + spl;
 		logger.info(spl);
 
-		placementConfig.loadOrCreate();
+		config.loadOrCreate();
 
 		new WriteToWorldCommand(this);
 	}

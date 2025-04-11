@@ -1,10 +1,10 @@
 package com.scalpelred.harddrive;
 
-public class FilePlacementConfigCommand {
+public class FileLayoutConfigCommand {
 
     private final HardDrive hardDrive;
 
-    public FilePlacementConfigCommand(HardDrive hardDrive) {
+    public FileLayoutConfigCommand(HardDrive hardDrive) {
 
         this.hardDrive = hardDrive;
 
