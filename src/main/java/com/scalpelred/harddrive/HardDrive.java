@@ -21,6 +21,7 @@ public class HardDrive implements ModInitializer {
 
 		config.loadOrCreate();
 
+		new FileLayoutConfigCommand(this);
 		new WriteToWorldCommand(this);
 	}
 }
