@@ -58,9 +58,13 @@ public abstract class Config {
         if (entry.getDescription() != null) hasAnyDoc = true;
     }
 
-    public void loadOrCreate() {
+    public boolean loadOrCreate() {
         load();
-        if (!isLoaded()) save();
+        if (!isLoaded()) {
+            save();
+            return true;
+        }
+        return false;
     }
 
     public void load() {
