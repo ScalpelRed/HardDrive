@@ -124,10 +124,132 @@ public class WorldIO {
             }
         }
     }
+
+    public IOResult ReadFromWorld(WorldAccess world, BlockPos pos, File file, long length)
+        throws IOException {
+
+        int sizeX = config.sizeX.getValue();
+        int sizeZ = config.sizeZ.getValue();
+        Block block1 = Blocks.REDSTONE_BLOCK;
+        int yStep = config.addLayerSpacing.getValue() ? 9 : 8;
+
+        byte[] buffer = new byte[4096];
+        int bytesRead = 0;
+        long totalBytes = 0;
+
+        int x;
+        int z;
+        BlockPos.Mutable cpos = pos.mutableCopy();
+
+        if (length >= 0) {
+            if (config.appendLength.getValue()) {
+                // TODO test if works
+                x = 8 % sizeX;
+                z = 8 / sizeX % sizeZ;
+            }
+            else {
+                x = 0;
+                z = 0;
+            }
+        }
+        else {
+            if (!config.appendLength.getValue()) return IOResult.NO_ANY_LENGTH;
+
+            x = 0;
+            z = 0;
+
+            length = 0;
+            byte shiftAmount = 0;
+
+            while (shiftAmount < 64) {
+
+                byte currentByte = 0;
+                byte mask = 1;
+
+                for (int b = 0; b < 8; b++) {
+
+                    BlockState blockState = world.getBlockState(cpos);
+                    if (blockState.getBlock().equals(block1)) currentByte |= mask;
+                    mask <<= 1;
+
+                    cpos.move(0, 1, 0);
+                }
+                length |= (long) currentByte << shiftAmount;
+                shiftAmount += 8;
+
+                x++;
+                cpos.move(1, -8, 0);
+                if (x >= sizeX) {
+                    x = 0;
+                    z++;
+                    cpos.setX(pos.getX());
+                    cpos.move(0, 0, 1);
+
+                    if (z >= sizeZ) {
+                        z = 0;
+                        cpos.setZ(pos.getZ());
+                        cpos.move(0, yStep, 0);
+                    }
+                }
+            }
+        }
+        if (length < 0) return IOResult.NEGATIVE_APPENDED_LENGTH;
+
+        try (FileOutputStream f = new FileOutputStream(file)) {
+            while (true) {
+
+                if (totalBytes >= length) {
+                    f.write(buffer, 0, bytesRead);
+                    return IOResult.SUCCESS;
+                }
+                if (bytesRead == 4096) {
+                    f.write(buffer, 0, 4096);
+                    bytesRead = 0;
+                }
+
+                byte currentByte = 0;
+                byte mask = 1;
+                if ((totalBytes & LONG_WAIT_NOTE_RATE) == 0) {
+                    hardDrive.logger.info("STILL WORKING! Wrote {} bytes so far.", totalBytes);
+                }
+
+                for (int b = 0; b < 8; b++) {
+
+                    BlockState blockState = world.getBlockState(cpos);
+                    if (blockState.getBlock().equals(block1)) currentByte |= mask;
+                    mask <<= 1;
+
+                    cpos.move(0, 1, 0);
+                }
+                buffer[bytesRead] = currentByte;
+                bytesRead++;
+                totalBytes++;
+
+                x++;
+                cpos.move(1, -8, 0);
+                if (x >= sizeX) {
+                    x = 0;
+                    z++;
+                    cpos.setX(pos.getX());
+                    cpos.move(0, 0, 1);
+
+                    if (z >= sizeZ) {
+                        z = 0;
+                        cpos.setZ(pos.getZ());
+                        cpos.move(0, yStep, 0);
+                    }
+                }
+            }
+        }
+    }
+
     public enum IOResult {
         SUCCESS,
 
         NOT_ENOUGH_SPACE,
         CEILING_HIT,
+
+        NO_ANY_LENGTH,
+        NEGATIVE_APPENDED_LENGTH,
     }
 }
