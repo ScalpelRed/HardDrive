@@ -23,7 +23,7 @@ public class WorldIO {
         this.config = hardDrive.config;
     }
 
-    public boolean WriteToWorld(WorldAccess world, BlockPos pos, File file)
+    public IOResult WriteToWorld(WorldAccess world, BlockPos pos, File file)
             throws IOException {
 
             byte[] buffer = new byte[4096];
@@ -62,7 +62,7 @@ public class WorldIO {
             }
             else {
                 bytesRead = f.read(buffer, 0, buffer.length);
-                if (bytesRead == -1) return true; // no data, leaving
+                if (bytesRead == -1) return IOResult.SUCCESS; // no data, leaving
                 totalBytes = 0;
             }
             currentByteIndex = 0;
@@ -81,7 +81,7 @@ public class WorldIO {
 
                 if (currentByteIndex == bytesRead) {
                     bytesRead = f.read(buffer, 0, buffer.length);
-                    if (bytesRead == -1) return true;
+                    if (bytesRead == -1) return IOResult.SUCCESS;
                     currentByteIndex = 0;
                 }
 
@@ -116,11 +116,18 @@ public class WorldIO {
                         y++;
                         cpos.setZ(pos.getZ());
                         cpos.move(0, yStep, 0);
+                        if (cpos.getY() + 8 > 320) return IOResult.CEILING_HIT;
 
-                        if (y >= sizeY) return false;
+                        if (y >= sizeY) return IOResult.NOT_ENOUGH_SPACE;
                     }
                 }
             }
         }
+    }
+    public enum IOResult {
+        SUCCESS,
+
+        NOT_ENOUGH_SPACE,
+        CEILING_HIT,
     }
 }

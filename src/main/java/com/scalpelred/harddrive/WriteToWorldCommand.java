@@ -14,6 +14,13 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class WriteToWorldCommand {
 
+    private final int SUCCESS = 1;
+    private final int NOT_ENOUGH_SPACE = 2;
+
+    private final int EXCEPTION_THROWN = -1;
+    private final int FILE_MISSING = -2;
+    private final int CEILING_HIT = -3;
+
     private final HardDrive hardDrive;
 
     public WriteToWorldCommand(HardDrive hardDrive) {
@@ -38,27 +45,36 @@ public class WriteToWorldCommand {
         File file = new File(fileName);
         if (!file.exists()) {
             src.sendError(Text.literal("File \"" + fileName + "\" is missing."));
-            return -1;
+            return FILE_MISSING;
         }
 
+        WorldIO.IOResult res;
         try {
-            if (hardDrive.worldIO.WriteToWorld(
+            res = hardDrive.worldIO.WriteToWorld(
                     context.getSource().getWorld(),
                     BlockPosArgumentType.getBlockPos(context, "position"),
-                    file
-            )) {
-                src.sendFeedback(() -> Text.literal("File \"" + fileName + "\" written."), true);
-                return 1;
-            }
-            else {
-                src.sendFeedback(() -> Text.literal("File \"" + fileName + "\" written, but there's not enough " +
-                        "space in the area, written as much as possible."), true);
-                return 2;
-            }
-        }
-        catch (Exception e) {
+                    file);
+        } catch (Exception e) {
             context.getSource().sendError(Text.literal("Exception thrown during writing: " + e.getMessage()));
-            return -2;
+            return EXCEPTION_THROWN;
+        }
+
+        switch (res) {
+            case SUCCESS:
+                src.sendFeedback(() -> Text.literal("File written."), true);
+                return SUCCESS;
+            case NOT_ENOUGH_SPACE:
+                src.sendFeedback(() -> Text.literal(
+                        "There's not enough space in the area, written as much as possible."), true);
+                return NOT_ENOUGH_SPACE;
+            case CEILING_HIT:
+                String msg = "World upper border was reached while writing the file!";
+                if (hardDrive.config.appendLength.getValue()) msg += " APPENDED LENGTH IS INVALID, reading the file may be problematic!";
+                final String msg2 = msg;
+                    src.sendFeedback(() -> Text.literal(msg2), true);
+                return CEILING_HIT;
+            default:
+                return 0;
         }
     }
 }
