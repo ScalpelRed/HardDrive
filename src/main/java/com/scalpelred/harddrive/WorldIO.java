@@ -37,11 +37,10 @@ public class WorldIO {
 
             // for some reason I like to compare these two branches to x86's protected and real modes
             // (nothing similar, actually)
-            boolean addLength = config.addLength.getValue();
-            if (addLength) {
                 sizeX = config.sizeX.getValue();
                 sizeZ = config.sizeZ.getValue();
                 sizeY = config.sizeY.getValue();
+            if (config.appendLength.getValue()) {
                 long volume = (long)sizeX * sizeZ * sizeY;
                 long length = file.length();
 

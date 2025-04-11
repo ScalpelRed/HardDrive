@@ -40,9 +40,9 @@ public class FileLayoutConfigCommand {
                                         .then(argument("value", IntegerArgumentType.integer())
                                                 .executes(context -> setValue(context, LayoutParam.size_y))
                                         )
-                                ).then(literal("add_length")
+                                ).then(literal("append_length")
                                         .then(argument("value", BoolArgumentType.bool())
-                                                .executes(context -> setValue(context, LayoutParam.add_length))
+                                                .executes(context -> setValue(context, LayoutParam.append_length))
                                         )
                                 ).then(literal("add_layer_spacing")
                                         .then(argument("value", BoolArgumentType.bool())
@@ -55,8 +55,8 @@ public class FileLayoutConfigCommand {
                                         .executes(context -> getValue(context, LayoutParam.size_z))
                                 ).then(literal("size_y")
                                         .executes(context -> getValue(context, LayoutParam.size_y))
-                                ).then(literal("add_length")
-                                        .executes(context -> getValue(context, LayoutParam.add_length))
+                                ).then(literal("append_length")
+                                        .executes(context -> getValue(context, LayoutParam.append_length))
                                 ).then(literal("add_layer_spacing")
                                         .executes(context -> getValue(context, LayoutParam.add_layer_spacing))
                                 )
@@ -115,11 +115,11 @@ public class FileLayoutConfigCommand {
                     case size_y -> config.sizeY.setValue(v);
                 }
                 break;
-            case add_length:
+            case append_length:
             case add_layer_spacing:
                 Boolean v2 = BoolArgumentType.getBool(context, "value");
                 value = v2;
-                if (param == LayoutParam.add_length) config.addLength.setValue(v2);
+                if (param == LayoutParam.append_length) config.appendLength.setValue(v2);
                 else config.addLayerSpacing.setValue(v2);
                 break;
             default:
@@ -137,7 +137,7 @@ public class FileLayoutConfigCommand {
             case size_x -> value = config.sizeX.getValue();
             case size_z -> value = config.sizeZ.getValue();
             case size_y -> value = config.sizeY.getValue();
-            case add_length -> value = config.addLength.getValue();
+            case append_length -> value = config.appendLength.getValue();
             case add_layer_spacing -> value = config.addLayerSpacing.getValue();
             default -> value = "INVALID";
         }
@@ -150,7 +150,7 @@ public class FileLayoutConfigCommand {
         size_x,
         size_z,
         size_y,
-        add_length,
+        append_length,
         add_layer_spacing
     }
 }

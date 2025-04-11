@@ -11,8 +11,8 @@ public class HardDriveConfig extends Config {
             "size_z", Integer.class, 16, "Number of Z rows");
     public ConfigEntryHandle<Integer> sizeY = new ConfigEntryHandle<>(
             "size_y", Integer.class, 4, "Number of Y layers");
-    public ConfigEntryHandle<Boolean> addLength = new ConfigEntryHandle<>(
-            "add_length", Boolean.class, true, "Add file length at the beginning");
+    public ConfigEntryHandle<Boolean> appendLength = new ConfigEntryHandle<>(
+            "append_length", Boolean.class, true, "Add file length at the beginning");
     public ConfigEntryHandle<Boolean> addLayerSpacing = new ConfigEntryHandle<>(
             "add_layer_spacing", Boolean.class, false, "Add one block between Y layers");
 
@@ -22,7 +22,7 @@ public class HardDriveConfig extends Config {
         registerEntryHandle(sizeX);
         registerEntryHandle(sizeZ);
         registerEntryHandle(sizeY);
-        registerEntryHandle(addLength);
+        registerEntryHandle(appendLength);
         registerEntryHandle(addLayerSpacing);
     }
 }
