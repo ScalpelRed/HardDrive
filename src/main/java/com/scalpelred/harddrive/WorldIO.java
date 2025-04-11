@@ -143,9 +143,9 @@ public class WorldIO {
 
         if (length >= 0) {
             if (config.appendLength.getValue()) {
-                // TODO test if works
                 x = 8 % sizeX;
                 z = 8 / sizeX % sizeZ;
+                cpos.move(x, 0, z);
             }
             else {
                 x = 0;
@@ -157,25 +157,19 @@ public class WorldIO {
 
             x = 0;
             z = 0;
-
             length = 0;
-            byte shiftAmount = 0;
-
-            while (shiftAmount < 64) {
+            long bit = 1;
+            while (bit != 0) {
 
                 byte currentByte = 0;
-                byte mask = 1;
-
                 for (int b = 0; b < 8; b++) {
 
                     BlockState blockState = world.getBlockState(cpos);
-                    if (blockState.getBlock().equals(block1)) currentByte |= mask;
-                    mask <<= 1;
+                    if (blockState.getBlock().equals(block1)) length |= bit;
+                    bit <<= 1;
 
                     cpos.move(0, 1, 0);
                 }
-                length |= (long) currentByte << shiftAmount;
-                shiftAmount += 8;
 
                 x++;
                 cpos.move(1, -8, 0);
@@ -224,6 +218,10 @@ public class WorldIO {
                 buffer[bytesRead] = currentByte;
                 bytesRead++;
                 totalBytes++;
+
+                if ((totalBytes & LONG_WAIT_NOTE_RATE) == 0) {
+                    hardDrive.logger.info("STILL WORKING! Read {} bytes so far.", totalBytes);
+                }
 
                 x++;
                 cpos.move(1, -8, 0);
