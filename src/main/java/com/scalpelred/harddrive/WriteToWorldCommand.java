@@ -44,18 +44,18 @@ public class WriteToWorldCommand {
         String fileName = StringArgumentType.getString(context, "file_path");
         File file = new File(fileName);
         if (!file.exists()) {
-            src.sendError(Text.literal("File \"" + fileName + "\" is missing."));
+            src.sendError(Text.literal("ERROR: File is missing."));
             return FILE_MISSING;
         }
 
         WorldIO.IOResult res;
         try {
-            res = hardDrive.worldIO.WriteToWorld(
+            res = hardDrive.worldIO.writeToWorld(
                     context.getSource().getWorld(),
                     BlockPosArgumentType.getBlockPos(context, "position"),
                     file);
         } catch (Exception e) {
-            context.getSource().sendError(Text.literal("Exception thrown during writing: " + e.getMessage()));
+            context.getSource().sendError(Text.literal("ERROR: Exception thrown during writing: " + e.getMessage()));
             return EXCEPTION_THROWN;
         }
 
@@ -65,11 +65,11 @@ public class WriteToWorldCommand {
                 return SUCCESS;
             case NOT_ENOUGH_SPACE:
                 src.sendFeedback(() -> Text.literal(
-                        "There's not enough space in the area, written as much as possible."), true);
+                        "WARNING: There's not enough space in the area, written as much as possible."), true);
                 return NOT_ENOUGH_SPACE;
             case CEILING_HIT:
-                String msg = "World upper border was reached while writing the file!";
-                if (hardDrive.config.appendLength.getValue()) msg += " APPENDED LENGTH IS INVALID, reading the file may be problematic!";
+                String msg = "ERROR: World upper border was reached while writing the file.";
+                if (hardDrive.config.appendLength.getValue()) msg += " APPENDED LENGTH IS INVALID, reading the file may be problematic.";
                 final String msg2 = msg;
                     src.sendFeedback(() -> Text.literal(msg2), true);
                 return CEILING_HIT;

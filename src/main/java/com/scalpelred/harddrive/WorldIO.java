@@ -23,7 +23,7 @@ public class WorldIO {
         this.config = hardDrive.config;
     }
 
-    public IOResult WriteToWorld(WorldAccess world, BlockPos pos, File file)
+    public IOResult writeToWorld(WorldAccess world, BlockPos pos, File file)
             throws IOException {
 
             byte[] buffer = new byte[4096];
@@ -125,7 +125,7 @@ public class WorldIO {
         }
     }
 
-    public IOResult ReadFromWorld(WorldAccess world, BlockPos pos, File file, long length)
+    public IOResult readFromWorld(WorldAccess world, BlockPos pos, File file, long length)
         throws IOException {
 
         int sizeX = config.sizeX.getValue();
