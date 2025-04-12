@@ -161,7 +161,6 @@ public class WorldIO {
             long bit = 1;
             while (bit != 0) {
 
-                byte currentByte = 0;
                 for (int b = 0; b < 8; b++) {
 
                     BlockState blockState = world.getBlockState(cpos);
@@ -183,6 +182,7 @@ public class WorldIO {
                         z = 0;
                         cpos.setZ(pos.getZ());
                         cpos.move(0, yStep, 0);
+                        if (cpos.getY() + 8 > 320) return IOResult.CEILING_HIT;
                     }
                 }
             }
@@ -203,9 +203,6 @@ public class WorldIO {
 
                 byte currentByte = 0;
                 byte mask = 1;
-                if ((totalBytes & LONG_WAIT_NOTE_RATE) == 0) {
-                    hardDrive.logger.info("STILL WORKING! Wrote {} bytes so far.", totalBytes);
-                }
 
                 for (int b = 0; b < 8; b++) {
 
@@ -218,7 +215,6 @@ public class WorldIO {
                 buffer[bytesRead] = currentByte;
                 bytesRead++;
                 totalBytes++;
-
                 if ((totalBytes & LONG_WAIT_NOTE_RATE) == 0) {
                     hardDrive.logger.info("STILL WORKING! Read {} bytes so far.", totalBytes);
                 }
@@ -235,6 +231,7 @@ public class WorldIO {
                         z = 0;
                         cpos.setZ(pos.getZ());
                         cpos.move(0, yStep, 0);
+                        if (cpos.getY() + 8 > 320) return IOResult.CEILING_HIT;
                     }
                 }
             }
