@@ -20,7 +20,7 @@ public class FileLayoutConfigCommand {
         this.config = hardDrive.config;
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> dispatcher.register(literal("filelayout")
-                        .requires(source -> source.hasPermissionLevel(0))
+                        .requires(source -> source.hasPermissionLevel(4))
                         .then(literal("save")
                                 .executes(this::save)
                         ).then(literal("load")

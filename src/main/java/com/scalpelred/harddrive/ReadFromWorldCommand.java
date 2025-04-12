@@ -34,7 +34,7 @@ public class ReadFromWorldCommand {
         this.hardDrive = hardDrive;
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> dispatcher.register(literal("readfromworld")
-                        .requires(source -> source.hasPermissionLevel(0))
+                        .requires(source -> source.hasPermissionLevel(4))
                         .then(argument("position", BlockPosArgumentType.blockPos())
                                 .then(argument("length", LongArgumentType.longArg())
                                         .then(argument("file_path", StringArgumentType.greedyString())

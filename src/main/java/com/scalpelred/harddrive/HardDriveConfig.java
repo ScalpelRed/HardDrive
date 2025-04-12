@@ -15,6 +15,10 @@ public class HardDriveConfig extends Config {
             "append_length", Boolean.class, true, "Add file length at the beginning");
     public ConfigEntryHandle<Boolean> addLayerSpacing = new ConfigEntryHandle<>(
             "add_layer_spacing", Boolean.class, false, "Add one block between Y layers");
+    public ConfigEntryHandle<Boolean> allowAnyPath = new ConfigEntryHandle<>(
+            "allow_any_path", Boolean.class, false,
+            "Allow reading/writing files from all directories on the host computer. " +
+                    "It grants access to your filesystem, USE CAREFULLY.");
 
     public HardDriveConfig(HardDrive hardDrive) {
         super(hardDrive.logger, "main", false);
@@ -24,5 +28,6 @@ public class HardDriveConfig extends Config {
         registerEntryHandle(sizeY);
         registerEntryHandle(appendLength);
         registerEntryHandle(addLayerSpacing);
+        registerEntryHandle(allowAnyPath);
     }
 }

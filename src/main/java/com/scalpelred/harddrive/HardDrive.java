@@ -20,7 +20,6 @@ public class HardDrive implements ModInitializer {
 		logger.info(spl);
 
 		config.loadOrCreate();
-
 		new FileLayoutConfigCommand(this);
 		new WriteToWorldCommand(this);
 		new ReadFromWorldCommand(this);
