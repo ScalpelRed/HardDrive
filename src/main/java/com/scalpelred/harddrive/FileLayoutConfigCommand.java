@@ -68,10 +68,10 @@ public class FileLayoutConfigCommand {
     private int save(CommandContext<ServerCommandSource> context) {
         try {
             hardDrive.config.save();
-            context.getSource().sendFeedback(() -> Text.literal("Config saved."), true);
+            sendFeedback("Config saved.", context.getSource());
             return 1;
         } catch (Exception e) {
-            context.getSource().sendError(Text.literal("Exception thrown during saving the config: " + e.getMessage()));
+            sendFeedback("Exception thrown during saving the config: " + e.getMessage(), context.getSource());
             return -1;
         }
     }
@@ -80,10 +80,10 @@ public class FileLayoutConfigCommand {
         try {
             boolean created = hardDrive.config.loadOrCreate();
             String message = created ? "Config created and loaded." : "Config loaded.";
-            context.getSource().sendFeedback(() -> Text.literal(message), true);
+            sendFeedback(message, context.getSource());
             return created ? 2 : 1;
         } catch (Exception e) {
-            context.getSource().sendError(Text.literal("Exception thrown during loading the config: " + e.getMessage()));
+            sendFeedback("Exception thrown during loading the config: " + e.getMessage(), context.getSource());
             return -1;
         }
     }
@@ -93,10 +93,10 @@ public class FileLayoutConfigCommand {
             hardDrive.config.load();
             boolean loaded = hardDrive.config.isLoaded();
             String message = loaded ? "Config loaded." : "Config does not exist.";
-            context.getSource().sendFeedback(() -> Text.literal(message), true);
+            sendFeedback(message, context.getSource());
             return loaded ? 1 : 0;
         } catch (Exception e) {
-            context.getSource().sendError(Text.literal("Exception thrown during loading the config: " + e.getMessage()));
+            sendFeedback("Exception thrown during loading the config: " + e.getMessage(), context.getSource());
             return -1;
         }
     }
@@ -107,27 +107,26 @@ public class FileLayoutConfigCommand {
             case size_x:
             case size_z:
             case size_y:
-                Integer v = IntegerArgumentType.getInteger(context, "value");
-                value = v;
+                Integer vInt = IntegerArgumentType.getInteger(context, "value");
+                value = vInt;
                 switch (param) { // that's acceptable I guess?...
-                    case size_x -> config.sizeX.setValue(v);
-                    case size_z -> config.sizeZ.setValue(v);
-                    case size_y -> config.sizeY.setValue(v);
+                    case size_x -> config.sizeX.setValue(vInt);
+                    case size_z -> config.sizeZ.setValue(vInt);
+                    case size_y -> config.sizeY.setValue(vInt);
                 }
                 break;
             case append_length:
             case add_layer_spacing:
-                Boolean v2 = BoolArgumentType.getBool(context, "value");
-                value = v2;
-                if (param == LayoutParam.append_length) config.appendLength.setValue(v2);
-                else config.addLayerSpacing.setValue(v2);
+                Boolean vBool = BoolArgumentType.getBool(context, "value");
+                value = vBool;
+                if (param == LayoutParam.append_length) config.appendLength.setValue(vBool);
+                else config.addLayerSpacing.setValue(vBool);
                 break;
             default:
                 value = false;
                 break;
         }
-        context.getSource().sendFeedback(() -> Text.literal("Value of \"" + param + "\" was set to \""
-                + value + "\""), true);
+        sendFeedback("Value of \"" + param + "\" was set to \"" + value + "\"", context.getSource());
         return 1;
     }
 
@@ -141,9 +140,12 @@ public class FileLayoutConfigCommand {
             case add_layer_spacing -> value = config.addLayerSpacing.getValue();
             default -> value = "INVALID";
         }
-        context.getSource().sendFeedback(() -> Text.literal("Value of \"" + param + "\" is \"" + value + "\""),
-                true);
+        sendFeedback("Value of \"" + param + "\" is \"" + value + "\"", context.getSource());
         return 1;
+    }
+
+    private void sendFeedback(String msg, ServerCommandSource src) {
+        src.sendFeedback(() -> Text.literal(msg), true);
     }
 
     enum LayoutParam {
