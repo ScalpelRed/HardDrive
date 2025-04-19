@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -28,6 +29,13 @@ public class ReadFromWorldCommand {
 
         this.hardDrive = hardDrive;
         outputDir = Paths.get(System.getProperty("user.dir"), "harddrive_out").toFile();
+        try {
+            createOutputDirIfNeeded();
+        }
+        catch (IOException e) {
+            hardDrive.logger.error("Error creating output folder: {}", e.getMessage());
+        }
+
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> dispatcher.register(literal("readfromworld")
                         .requires(source -> source.hasPermissionLevel(4))
@@ -54,9 +62,7 @@ public class ReadFromWorldCommand {
         try {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                if (!outputDir.exists()) {
-                    outputDir = Files.createDirectories(outputDir.toPath()).toFile().getCanonicalFile();
-                }
+                createOutputDirIfNeeded();
                 file = Paths.get(outputDir.getPath(), file.getPath()).toFile();
             }
             file = file.getCanonicalFile();
@@ -106,6 +112,14 @@ public class ReadFromWorldCommand {
             }
             default -> 0;
         };
+    }
+    
+    private boolean createOutputDirIfNeeded() throws IOException {
+        if (!outputDir.exists()) {
+            outputDir = Files.createDirectories(outputDir.toPath()).toFile().getCanonicalFile();
+            return true;
+        }
+        else return false;
     }
 
     private void sendFeedback(String msg, ServerCommandSource src) {

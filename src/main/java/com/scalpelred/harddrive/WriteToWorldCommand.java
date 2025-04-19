@@ -8,6 +8,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -23,6 +24,13 @@ public class WriteToWorldCommand {
 
         this.hardDrive = hardDrive;
         inputDir = Paths.get(System.getProperty("user.dir"), "harddrive_in").toFile();
+        try {
+            createInputDirIfNeeded();
+        }
+        catch (IOException e) {
+            hardDrive.logger.error("Error creating input folder: {}", e.getMessage());
+        }
+
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> dispatcher.register(literal("writetoworld")
                         .requires(source -> source.hasPermissionLevel(4))
@@ -44,9 +52,7 @@ public class WriteToWorldCommand {
         try {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                if (!inputDir.exists()) {
-                    inputDir = Files.createDirectories(inputDir.toPath()).toFile().getCanonicalFile();
-                }
+                createInputDirIfNeeded();
                 file = Paths.get(inputDir.getPath(), file.getPath()).toFile();
             }
             file = file.getCanonicalFile();
@@ -88,6 +94,14 @@ public class WriteToWorldCommand {
             default:
                 return 0;
         }
+    }
+
+    private boolean createInputDirIfNeeded() throws IOException {
+        if (!inputDir.exists()) {
+            inputDir = Files.createDirectories(inputDir.toPath()).toFile().getCanonicalFile();
+            return true;
+        }
+        else return false;
     }
 
     private void sendFeedback(String msg, ServerCommandSource src) {
