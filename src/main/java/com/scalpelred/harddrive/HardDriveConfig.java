@@ -1,5 +1,6 @@
 package com.scalpelred.harddrive;
 
+import com.scalpelred.mcmodutil.BlockConfigEntry;
 import com.scalpelred.mcmodutil.Config;
 import com.scalpelred.mcmodutil.SimpleConfigEntry;
 import net.minecraft.block.Blocks;
@@ -20,7 +21,13 @@ public class HardDriveConfig extends Config {
 
     public SimpleConfigEntry<Boolean> addLayerSpacing = new SimpleConfigEntry<>(this,
             "add_layer_spacing", Boolean.class, true, "Add one block between Y layers");
-    public ConfigEntryHandle<Boolean> allowAnyPath = new ConfigEntryHandle<>(
+
+    public BlockConfigEntry block_zero = new BlockConfigEntry(this,
+            "block_zero", Blocks.LIME_CONCRETE, "Block that represents zeroes");
+
+    public BlockConfigEntry block_one = new BlockConfigEntry(this,
+            "block_zero", Blocks.REDSTONE_BLOCK, "Block that represents ones");
+
     public SimpleConfigEntry<Boolean> allowAnyPath = new SimpleConfigEntry<>(this,
             "allow_any_path", Boolean.class, false,
             "Allow reading/writing files from any directories on the host computer. " +
@@ -34,6 +41,8 @@ public class HardDriveConfig extends Config {
         registerEntryHandle(sizeY);
         registerEntryHandle(appendLength);
         registerEntryHandle(addLayerSpacing);
+        registerEntryHandle(block_zero);
+        registerEntryHandle(block_one);
         registerEntryHandle(allowAnyPath);
     }
 }

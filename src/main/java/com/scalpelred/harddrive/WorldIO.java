@@ -67,8 +67,8 @@ public class WorldIO {
             }
             currentByteIndex = 0;
 
-            BlockState block0 = Blocks.GREEN_STAINED_GLASS.getDefaultState();
-            BlockState block1 = Blocks.REDSTONE_BLOCK.getDefaultState();
+            BlockState block0 = config.block_zero.getValue().getDefaultState();
+            BlockState block1 = config.block_one.getValue().getDefaultState();
             int yStep = config.addLayerSpacing.getValue() ? 9 : 8;
 
             BlockPos.Mutable cpos = pos.mutableCopy();
@@ -130,7 +130,7 @@ public class WorldIO {
 
         int sizeX = config.sizeX.getValue();
         int sizeZ = config.sizeZ.getValue();
-        Block block1 = Blocks.REDSTONE_BLOCK;
+        Block block1 = config.block_one.getValue();
         int yStep = config.addLayerSpacing.getValue() ? 9 : 8;
 
         byte[] buffer = new byte[4096];
