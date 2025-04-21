@@ -1,21 +1,27 @@
 package com.scalpelred.harddrive;
 
 import com.scalpelred.mcmodutil.Config;
-import com.scalpelred.mcmodutil.ConfigEntryHandle;
+import com.scalpelred.mcmodutil.SimpleConfigEntry;
+import net.minecraft.block.Blocks;
 
 public class HardDriveConfig extends Config {
 
-    public ConfigEntryHandle<Integer> sizeX = new ConfigEntryHandle<>(
+    public SimpleConfigEntry<Integer> sizeX = new SimpleConfigEntry<>(this,
             "size_x", Integer.class, 16, "Number of X rows");
-    public ConfigEntryHandle<Integer> sizeZ = new ConfigEntryHandle<>(
+
+    public SimpleConfigEntry<Integer> sizeZ = new SimpleConfigEntry<>(this,
             "size_z", Integer.class, 16, "Number of Z rows");
-    public ConfigEntryHandle<Integer> sizeY = new ConfigEntryHandle<>(
+
+    public SimpleConfigEntry<Integer> sizeY = new SimpleConfigEntry<>(this,
             "size_y", Integer.class, 4, "Number of Y layers");
-    public ConfigEntryHandle<Boolean> appendLength = new ConfigEntryHandle<>(
+
+    public SimpleConfigEntry<Boolean> appendLength = new SimpleConfigEntry<>(this,
             "append_length", Boolean.class, true, "Add file length at the beginning");
-    public ConfigEntryHandle<Boolean> addLayerSpacing = new ConfigEntryHandle<>(
+
+    public SimpleConfigEntry<Boolean> addLayerSpacing = new SimpleConfigEntry<>(this,
             "add_layer_spacing", Boolean.class, true, "Add one block between Y layers");
     public ConfigEntryHandle<Boolean> allowAnyPath = new ConfigEntryHandle<>(
+    public SimpleConfigEntry<Boolean> allowAnyPath = new SimpleConfigEntry<>(this,
             "allow_any_path", Boolean.class, false,
             "Allow reading/writing files from any directories on the host computer. " +
                     "It grants filesystem access to all operators, USE CAREFULLY.");

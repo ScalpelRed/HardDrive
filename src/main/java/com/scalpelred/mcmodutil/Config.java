@@ -17,14 +17,14 @@ public abstract class Config {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    public final Logger logger;
+
     private final String name;
-    private final Logger logger;
     private final File folder;
     private final File configFile;
     private final File docFile;
-    private JsonObject jsonRoot;
-    private final LinkedHashMap<String, JsonElement> jsonEntries = new LinkedHashMap<>();
-    private final LinkedHashMap<String, ConfigEntryHandle<?>> entryHandles = new LinkedHashMap<>();
+    private boolean isLoaded;
+    private final LinkedHashMap<String, ConfigEntry<?>> entries = new LinkedHashMap<>();
 
     private String generalDoc = null;
     private boolean hasAnyDoc = false;
@@ -53,8 +53,8 @@ public abstract class Config {
         hasAnyDoc = generalDoc == null;
     }
 
-    protected void registerEntryHandle(ConfigEntryHandle<?> entry) {
-        entryHandles.put(entry.getName(), entry);
+    protected void registerEntryHandle(ConfigEntry<?> entry) {
+        entries.put(entry.getName(), entry);
         if (entry.getDescription() != null) hasAnyDoc = true;
     }
 
@@ -68,12 +68,13 @@ public abstract class Config {
     }
 
     public void load() {
+        isLoaded = false;
+
         if (!configFile.exists()) {
             logger.error("Can't load config \"{}\": file is missing.", name);
             return;
         }
 
-        jsonEntries.clear();
         String content;
         try {
             content = new String(Files.readAllBytes(configFile.toPath()));
@@ -82,46 +83,26 @@ public abstract class Config {
             logger.error("Can't load config \"{}\": {}", name, e.getMessage());
             return;
         }
+        JsonObject root;
         try {
-            jsonRoot = JsonParser.parseString(content).getAsJsonObject(); // jsonRoot is the json version of config
+            root = JsonParser.parseString(content).getAsJsonObject();
         }
         catch (IllegalStateException e) {
             logger.error("Error loading config \"{}\": {}", name, e.getMessage());
-            jsonRoot = null;
             return;
         }
 
-        for (Map.Entry<String, JsonElement> pair : jsonRoot.entrySet()) {
-            jsonEntries.put(pair.getKey(), pair.getValue()); // making a dictionary of name-(json version of entry value)
+        for (ConfigEntry<?> entry : entries.values()) entry.resetValue();
+        for (Map.Entry<String, JsonElement> json : root.entrySet()) {
+            ConfigEntry<?> entry = entries.get(json.getKey());
+            if (entry != null) entry.valueFromJsonElement(json.getValue());
         }
 
-        for (Map.Entry<String, ConfigEntryHandle<?>> pair : entryHandles.entrySet()) {
-            JsonElement entry = jsonEntries.get(pair.getKey());
-            ConfigEntryHandle<?> handle = pair.getValue(); // creating a normal handle for entry
-            if (entry == null) handle.resetValue(); // if we don't have this entry in json, we set default value
-            else {
-                handle.valueFromJsonElement(entry, logger); // otherwise, we set it to value we read
-                handle.resetHasChanged();
-            }
-        }
-
+        isLoaded = true;
         logger.info("Config \"{}\" loaded!", name);
     }
 
     public void save() {
-        if (jsonRoot == null) jsonRoot = new JsonObject(); // creating new json version of config
-
-        for (Map.Entry<String, ConfigEntryHandle<?>> pair : entryHandles.entrySet()) {
-            ConfigEntryHandle<?> handle = pair.getValue();
-            if (!handle.hasChanged()) continue; // no need to update
-            String name = pair.getKey();
-            if (jsonEntries.get(name) != null) jsonRoot.remove(name); // remove entry with old value
-            JsonElement json = handle.toJsonElement();
-            jsonRoot.add(name, json); // add entry
-            jsonEntries.put(name, json);
-            handle.resetHasChanged();
-        }
-
         if (!folder.exists()) {
             try {
                 Files.createDirectories(folder.toPath());
@@ -145,9 +126,11 @@ public abstract class Config {
         }
         else configFileExists = true;
 
+        JsonObject root = new JsonObject();
+        for (ConfigEntry<?> entry : entries.values()) root.add(entry.getName(), entry.toJsonElement());
         if (configFileExists) {
             try (FileWriter fileWriter = new FileWriter(configFile)) {
-                GSON.toJson(jsonRoot, fileWriter);
+                GSON.toJson(root, fileWriter);
             }
             catch (IOException e) {
                 logger.error("Can't save config \"{}\": {}", name, e.getMessage());
@@ -162,10 +145,10 @@ public abstract class Config {
                     fileWriter.write(generalDoc);
                     fileWriter.append("\n\n");
                 }
-                for (ConfigEntryHandle<?> entry : entryHandles.values()) {
+                for (ConfigEntry<?> entry : entries.values()) {
                     String desc = entry.getDescription();
                     if (desc == null) continue;
-                    fileWriter.write("=== " + entry.getName() + " (" + entry.defaultValue().getClass().getSimpleName() + ") ===\n");
+                    fileWriter.write("=== " + entry.getName() + " (" + entry.getDefaultValue().getClass().getSimpleName() + ") ===\n");
                     fileWriter.write(desc);
                     fileWriter.write("\n\n");
                 }
@@ -180,6 +163,8 @@ public abstract class Config {
     }
 
     public boolean isLoaded() {
-        return jsonRoot != null;
+        return isLoaded;
     }
+
+    public String getName() { return name; }
 }
