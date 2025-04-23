@@ -102,13 +102,13 @@ public class FileLayoutConfigCommand {
     }
 
     private int setValue(CommandContext<ServerCommandSource> context, LayoutParam param) {
-        Object value;
+        String reportValue;
         switch (param) {
             case size_x:
             case size_z:
             case size_y:
                 Integer vInt = IntegerArgumentType.getInteger(context, "value");
-                value = vInt;
+                reportValue = String.valueOf(vInt);
                 switch (param) { // that's acceptable I guess?...
                     case size_x -> config.sizeX.setValue(vInt);
                     case size_z -> config.sizeZ.setValue(vInt);
@@ -118,15 +118,15 @@ public class FileLayoutConfigCommand {
             case append_length:
             case add_layer_spacing:
                 Boolean vBool = BoolArgumentType.getBool(context, "value");
-                value = vBool;
+                reportValue = String.valueOf(vBool);
                 if (param == LayoutParam.append_length) config.appendLength.setValue(vBool);
                 else config.addLayerSpacing.setValue(vBool);
                 break;
             default:
-                value = false;
+                reportValue = "INVALID";
                 break;
         }
-        sendFeedback("Value of \"" + param + "\" was set to \"" + value + "\"", context.getSource());
+        sendFeedback("Value of \"" + param + "\" was set to \"" + reportValue + "\"", context.getSource());
         return 1;
     }
 

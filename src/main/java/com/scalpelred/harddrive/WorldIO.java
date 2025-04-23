@@ -26,17 +26,16 @@ public class WorldIO {
     public IOResult writeToWorld(WorldAccess world, BlockPos pos, File file)
             throws IOException {
 
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            int currentByteIndex;
-            long totalBytes;
+        byte[] buffer = new byte[4096];
+        int bytesRead;
+        int currentByteIndex;
+        long totalBytes;
 
-            int sizeX = config.sizeX.getValue();
-            int sizeZ = config.sizeZ.getValue();
-            int sizeY = config.sizeY.getValue();
+        int sizeX = config.sizeX.getValue();
+        int sizeZ = config.sizeZ.getValue();
+        int sizeY = config.sizeY.getValue();
 
-        try (FileInputStream f = new FileInputStream(file))
-        {
+        try (FileInputStream f = new FileInputStream(file)) {
             // for some reason I like to compare these two branches to x86's protected and real modes
             // (nothing similar, actually)
             if (config.appendLength.getValue()) {
@@ -164,7 +163,7 @@ public class WorldIO {
                 for (int b = 0; b < 8; b++) {
 
                     BlockState blockState = world.getBlockState(cpos);
-                    if (blockState.getBlock().equals(block1)) length |= bit;
+                    if (blockState.getBlock() == block1) length |= bit;
                     bit <<= 1;
 
                     cpos.move(0, 1, 0);

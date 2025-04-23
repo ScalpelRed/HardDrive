@@ -22,12 +22,16 @@ public class BlockConfigEntry extends ConfigEntry<Block> {
 
     @Override
     public JsonElement toJsonElement() {
-        return GSON.toJsonTree(this.getName(), String.class);
+        return GSON.toJsonTree(getBlockId(this.getValue()), String.class);
     }
 
     @Override
     protected Block parseJsonElement(JsonElement json) {
         return getBlock(json.getAsString());
+    }
+
+    public static String getBlockId(Block block) {
+        return Registries.BLOCK.getId(block).toString();
     }
 
     public static Block getBlock(String name) {

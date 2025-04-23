@@ -23,10 +23,11 @@ public class HardDriveConfig extends Config {
             "add_layer_spacing", Boolean.class, true, "Add one block between Y layers");
 
     public BlockConfigEntry block_zero = new BlockConfigEntry(this,
-            "block_zero", Blocks.LIME_CONCRETE, "Block that represents zeroes");
+            "block_zero", Blocks.LIME_CONCRETE, "Block that represents zeroes.\n" +
+            "NOTE: transparent blocks in big files may cause intense lags.");
 
     public BlockConfigEntry block_one = new BlockConfigEntry(this,
-            "block_zero", Blocks.REDSTONE_BLOCK, "Block that represents ones");
+            "block_one", Blocks.REDSTONE_BLOCK, "Block that represents ones");
 
     public SimpleConfigEntry<Boolean> allowAnyPath = new SimpleConfigEntry<>(this,
             "allow_any_path", Boolean.class, false,
