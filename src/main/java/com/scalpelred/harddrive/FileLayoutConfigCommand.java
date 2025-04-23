@@ -3,7 +3,10 @@ package com.scalpelred.harddrive;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.scalpelred.mcmodutil.BlockConfigEntry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.block.Block;
+import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
@@ -44,6 +47,14 @@ public class FileLayoutConfigCommand {
                                         .then(argument("value", BoolArgumentType.bool())
                                                 .executes(context -> setValue(context, LayoutParam.append_length))
                                         )
+                                ).then(literal("block_zero")
+                                        .then(argument("value", BlockStateArgumentType.blockState(registryAccess))
+                                                .executes(context -> setValue(context, LayoutParam.block_zero))
+                                        )
+                                ).then(literal("block_one")
+                                        .then(argument("value", BlockStateArgumentType.blockState(registryAccess))
+                                                .executes(context -> setValue(context, LayoutParam.block_one))
+                                        )
                                 ).then(literal("add_layer_spacing")
                                         .then(argument("value", BoolArgumentType.bool())
                                                 .executes(context -> setValue(context, LayoutParam.add_layer_spacing)))
@@ -57,6 +68,10 @@ public class FileLayoutConfigCommand {
                                         .executes(context -> getValue(context, LayoutParam.size_y))
                                 ).then(literal("append_length")
                                         .executes(context -> getValue(context, LayoutParam.append_length))
+                                ).then(literal("block_zero")
+                                        .executes(context -> getValue(context, LayoutParam.block_zero))
+                                ).then(literal("block_one")
+                                        .executes(context -> getValue(context, LayoutParam.block_one))
                                 ).then(literal("add_layer_spacing")
                                         .executes(context -> getValue(context, LayoutParam.add_layer_spacing))
                                 )
@@ -122,6 +137,18 @@ public class FileLayoutConfigCommand {
                 if (param == LayoutParam.append_length) config.appendLength.setValue(vBool);
                 else config.addLayerSpacing.setValue(vBool);
                 break;
+            case block_zero:
+                Block vBlock0 = BlockStateArgumentType.getBlockState(context, "value")
+                        .getBlockState().getBlock();
+                reportValue = BlockConfigEntry.getBlockId(vBlock0);
+                config.block_zero.setValue(vBlock0);
+                break;
+            case block_one:
+                Block vBlock1 = BlockStateArgumentType.getBlockState(context, "value")
+                        .getBlockState().getBlock();
+                reportValue = BlockConfigEntry.getBlockId(vBlock1);
+                config.block_one.setValue(vBlock1);
+                break;
             default:
                 reportValue = "INVALID";
                 break;
@@ -137,6 +164,8 @@ public class FileLayoutConfigCommand {
             case size_z -> value = config.sizeZ.getValue();
             case size_y -> value = config.sizeY.getValue();
             case append_length -> value = config.appendLength.getValue();
+            case block_zero -> value = config.block_zero.getValue().getName();
+            case block_one -> value = config.block_one.getValue().getName();
             case add_layer_spacing -> value = config.addLayerSpacing.getValue();
             default -> value = "INVALID";
         }
@@ -153,6 +182,8 @@ public class FileLayoutConfigCommand {
         size_z,
         size_y,
         append_length,
+        block_zero,
+        block_one,
         add_layer_spacing
     }
 }
