@@ -4,36 +4,29 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldAccess;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class WriteToWorldCommand {
 
-    private final HardDrive hardDrive;
-    private File inputDir;
+    public final HardDrive hardDrive;
+    private final WorldWriter writer;
 
     public WriteToWorldCommand(HardDrive hardDrive) {
 
         this.hardDrive = hardDrive;
-        inputDir = Paths.get(System.getProperty("user.dir"), "harddrive_in").toFile();
-        try {
-            createInputDirIfNeeded();
-        }
-        catch (IOException e) {
-            hardDrive.logger.error("Error creating input folder: {}", e.getMessage());
-        }
-
+        this.writer = new WorldWriter(hardDrive.IOManager);
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> dispatcher.register(literal("writetoworld")
-                        .requires(source -> source.hasPermissionLevel(4))
+                        .requires(source -> source.hasPermissionLevel(hardDrive.config.commandsPermissionLevel.getValue()))
                         .then(argument("position", BlockPosArgumentType.blockPos())
                                         .then(argument("file_path", StringArgumentType.greedyString())
                                                 .executes(this::execute)
@@ -44,64 +37,21 @@ public class WriteToWorldCommand {
     }
 
     private int execute(CommandContext<ServerCommandSource> context) {
-
         ServerCommandSource src = context.getSource();
-        String fileName = StringArgumentType.getString(context, "file_path");
-
-        WorldIO.IOResult res;
-        try {
-            File file = new File(fileName);
-            if (!file.isAbsolute()) {
-                createInputDirIfNeeded();
-                file = Paths.get(inputDir.getPath(), file.getPath()).toFile();
-            }
-            file = file.getCanonicalFile();
-
-            if (!hardDrive.config.allowAnyPath.getValue()) {
-                if (!file.getPath().startsWith(inputDir.getPath())) {
-                    sendFeedback("ERROR: Access denied (use \"harddrive_in\" folder or it's subfolders)", src);
-                    return -1;
-                }
-            }
-
-            if (!file.exists()) {
-                sendFeedback("ERROR: File is missing.", src);
-                return -1;
-            }
-
-            res = hardDrive.worldIO.writeToWorld(
-                    context.getSource().getWorld(),
-                    BlockPosArgumentType.getBlockPos(context, "position"),
-                    file);
-        } catch (Exception e) {
-            sendFeedback("ERROR: Exception thrown during writing: " + e.getMessage(), src);
-            return -1;
-        }
-
-        switch (res) {
-            case SUCCESS:
-                sendFeedback("File written.", src);
+        if (!src.isExecutedByPlayer()) return -1;
+        synchronized (hardDrive.IOManager) {
+            if (hardDrive.IOManager.isBusy()) {
+                sendFeedback("Other operation is running right now.", src);
                 return 1;
-            case NOT_ENOUGH_SPACE:
-                sendFeedback("ERROR: There's not enough space in the area, written as much as possible.", src);
-                return -1;
-            case CEILING_HIT:
-                String msg = "ERROR: World upper border was reached while writing the file.";
-                if (hardDrive.config.appendLength.getValue())
-                    msg += " APPENDED LENGTH IS INVALID, reading the file may be problematic.";
-                sendFeedback(msg, src);
-                return -1;
-            default:
-                return 0;
+            }
+            WorldAccess world = src.getWorld();
+            BlockPos pos = BlockPosArgumentType.getBlockPos(context, "position");
+            File file = new File(StringArgumentType.getString(context, "file_path"));
+            PlayerEntity player = (PlayerEntity) src.getEntity();
+            writer.reset(world, pos, file, player);
+            hardDrive.IOManager.startWorker(writer);
+            return 1;
         }
-    }
-
-    private boolean createInputDirIfNeeded() throws IOException {
-        if (!inputDir.exists()) {
-            inputDir = Files.createDirectories(inputDir.toPath()).toFile().getCanonicalFile();
-            return true;
-        }
-        else return false;
     }
 
     private void sendFeedback(String msg, ServerCommandSource src) {
