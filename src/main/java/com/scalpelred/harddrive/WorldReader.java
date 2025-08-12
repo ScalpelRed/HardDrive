@@ -37,7 +37,10 @@ public class WorldReader implements IIOWorker {
     private int sizeX;
     private int sizeZ;
     private Block block1;
-    private int yStep;
+    private int stepBit;
+    private int stepX;
+    private int stepZ;
+    private int stepY;
     private final static int BUFFER_LENGTH = 4096;
     private final byte[] buffer = new byte[BUFFER_LENGTH];
     private int bufferByteIndex;
@@ -58,13 +61,12 @@ public class WorldReader implements IIOWorker {
             this.originalLength = this.length = length;
             this.player = player;
 
+            working = false;
             overwriteAsked = false;
 
             try {
                 String outputDirPath = IOManager.getOutputDir().getPath();
-                if (!file.isAbsolute()) {
-                    file = Paths.get(outputDirPath, file.getPath()).toFile();
-                }
+                if (!file.isAbsolute()) file = Paths.get(outputDirPath, file.getPath()).toFile();
                 file = file.getCanonicalFile();
 
                 if (!IOManager.hardDrive.config.allowAnyPath.getValue() && !file.getPath().startsWith(outputDirPath)) {
@@ -92,12 +94,14 @@ public class WorldReader implements IIOWorker {
             sizeX = config.sizeX.getValue();
             sizeZ = config.sizeZ.getValue();
             block1 = config.block_one.getValue();
-            yStep = config.layerSpacing.getValue() + 8;
+            stepBit = config.stepBit.getValue();
+            stepX = config.stepX.getValue();
+            stepZ = config.stepZ.getValue();
+            stepY = config.stepY.getValue();
             bufferByteIndex = 0;
             totalBytes = 0;
             currentPos = position.mutableCopy();
             sendFeedback("Reading...");
-            fileStream = new FileOutputStream(file);
             if (length >= 0) {
                 if (config.embedLength.getValue()) {
                     // here we have embedded length, but ignoring it - just shifting the position
@@ -123,22 +127,22 @@ public class WorldReader implements IIOWorker {
                         if (blockState.getBlock() == block1) length |= bit;
                         bit <<= 1;
 
-                        currentPos.move(0, 1, 0);
+                        currentPos.move(0, stepBit, 0);
                     }
 
                     localX++;
-                    currentPos.move(1, -8, 0);
+                    currentPos.move(stepX, -stepBit * 8, 0);
                     if (localX >= sizeX) {
                         localX = 0;
                         localZ++;
                         currentPos.setX(position.getX());
-                        currentPos.move(0, 0, 1);
+                        currentPos.move(0, 0, stepZ);
 
                         if (localZ >= sizeZ) {
                             localZ = 0;
                             currentPos.setZ(position.getZ());
-                            currentPos.move(0, yStep, 0);
-                            if (currentPos.getY() + yStep > 320) {
+                            currentPos.move(0, stepY, 0);
+                            if (currentPos.getY() + stepY > 320) {
                                 onDoneNormally(Result.CUT_BY_WORLD_EDGE);
                                 return;
                             }
@@ -192,7 +196,7 @@ public class WorldReader implements IIOWorker {
                         BlockState blockState = world.getBlockState(currentPos);
                         if (blockState.getBlock().equals(block1)) currentByte |= mask;
                         mask <<= 1;
-                        currentPos.move(0, 1, 0);
+                        currentPos.move(0, stepBit, 0);
                     }
                     buffer[bufferByteIndex] = currentByte;
                     bufferByteIndex++;
@@ -203,18 +207,18 @@ public class WorldReader implements IIOWorker {
                     }
 
                     localX++;
-                    currentPos.move(1, -8, 0);
+                    currentPos.move(stepX, -stepBit * 8, 0);
                     if (localX >= sizeX) {
                         localX = 0;
                         localZ++;
                         currentPos.setX(position.getX());
-                        currentPos.move(0, 0, 1);
+                        currentPos.move(0, 0, stepZ);
 
                         if (localZ >= sizeZ) {
                             localZ = 0;
                             currentPos.setZ(position.getZ());
-                            currentPos.move(0, yStep, 0);
-                            if (currentPos.getY() + yStep > 320) {
+                            currentPos.move(0, stepY, 0);
+                            if (currentPos.getY() + stepY > 320) {
                                 onDoneNormally(Result.CUT_BY_WORLD_EDGE);
                                 return;
                             }
@@ -246,7 +250,7 @@ public class WorldReader implements IIOWorker {
                     sendFeedback("Reading done.");
                     break;
                 case NOT_ENOUGH_SPACE:
-                    sendFeedback("ERROR: There's not enough space in the area, written as much as possible.");
+                    sendFeedback("WARNING: Not enough space, written as much as possible.");
                     break;
                 case NEGATIVE_EMBEDDED_LENGTH:
                     sendFeedback("ERROR: Embedded length is negative.");
@@ -255,7 +259,7 @@ public class WorldReader implements IIOWorker {
                     sendFeedback("ERROR: No length provided, specify it as an argument or use embedded length.");
                     break;
                 case CUT_BY_WORLD_EDGE:
-                    sendFeedback("ERROR: World border was reached while reading the file.");
+                    sendFeedback("WARNING: World border was reached while reading the file.");
                     break;
                 case INTERRUPTED:
                     sendFeedback("Reading interrupted manually.");

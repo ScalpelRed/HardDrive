@@ -16,10 +16,21 @@ public class HardDriveConfig extends Config {
     public SimpleConfigEntry<Integer> sizeY = new SimpleConfigEntry<>(this,
             "size_y", Integer.class, 4, "Number of Y layers");
 
-    public SimpleConfigEntry<Boolean> embedLength = new SimpleConfigEntry<>(this,
+    public SimpleConfigEntry<Integer> stepBit = new SimpleConfigEntry<>(this,
+            "step_bit", Integer.class, 1, "Step in bit position within a byte");
 
-    public SimpleConfigEntry<Integer> layerSpacing = new SimpleConfigEntry<>(this,
-            "layer_spacing", Integer.class, 1, "Amount of blocks to add between Y layers");
+    public SimpleConfigEntry<Integer> stepX = new SimpleConfigEntry<>(this,
+            "step_x", Integer.class, 1, "Step in byte position at X direction");
+
+    public SimpleConfigEntry<Integer> stepZ = new SimpleConfigEntry<>(this,
+            "size_z", Integer.class, 1, "Step in byte position at Z direction");
+
+    public SimpleConfigEntry<Integer> stepY = new SimpleConfigEntry<>(this,
+            "size_y", Integer.class, 9, "Step in byte position at Y direction. " +
+            "Note that bytes are vertical, and the value should be at least 8.");
+
+    public SimpleConfigEntry<Boolean> embedLength = new SimpleConfigEntry<>(this,
+            "embed_length", Boolean.class, true, "Add file length at the beginning");
 
     public BlockConfigEntry block_zero = new BlockConfigEntry(this,
             "block_zero", Blocks.LIME_CONCRETE, "Block that represents zeroes.\n" +
@@ -52,8 +63,11 @@ public class HardDriveConfig extends Config {
         registerEntryHandle(sizeX);
         registerEntryHandle(sizeZ);
         registerEntryHandle(sizeY);
+        registerEntryHandle(stepBit);
+        registerEntryHandle(stepX);
+        registerEntryHandle(stepZ);
+        registerEntryHandle(stepY);
         registerEntryHandle(embedLength);
-        registerEntryHandle(layerSpacing);
         registerEntryHandle(block_zero);
         registerEntryHandle(block_one);
         registerEntryHandle(allowAnyPath);

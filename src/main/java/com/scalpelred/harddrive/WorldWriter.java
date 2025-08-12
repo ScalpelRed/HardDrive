@@ -9,8 +9,6 @@ import net.minecraft.world.WorldAccess;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Paths;
 
 public class WorldWriter implements IIOWorker {
@@ -36,7 +34,10 @@ public class WorldWriter implements IIOWorker {
     private int sizeY;
     private BlockState block0;
     private BlockState block1;
-    private int yStep;
+    private int stepBit;
+    private int stepX;
+    private int stepZ;
+    private int stepY;
     private static final int BUFFER_LENGTH = 4096;
     private final byte[] buffer = new byte[BUFFER_LENGTH];
     private int bytesRead;
@@ -104,11 +105,14 @@ public class WorldWriter implements IIOWorker {
                         return;
                     }
                 }
+                stepBit = config.stepBit.getValue();
+                stepX = config.stepX.getValue();
+                stepZ = config.stepZ.getValue();
+                stepY = config.stepY.getValue();
                 bufferByteIndex = 0;
                 totalBytes = 0;
                 block0 = config.block_zero.getValue().getDefaultState();
                 block1 = config.block_one.getValue().getDefaultState();
-                yStep = config.layerSpacing.getValue() + 8;
                 localX = localY = localZ = 0;
                 currentPos = pos.mutableCopy();
                 working = true;
@@ -143,7 +147,7 @@ public class WorldWriter implements IIOWorker {
                         mask <<= 1;
                         if (bit == 0) world.setBlockState(currentPos, block0, Block.NOTIFY_ALL);
                         else world.setBlockState(currentPos, block1, Block.NOTIFY_ALL);
-                        currentPos.move(0, 1, 0);
+                        currentPos.move(0, stepBit, 0);
                     }
                     bufferByteIndex++;
                     totalBytes++;
@@ -153,19 +157,19 @@ public class WorldWriter implements IIOWorker {
                     }
 
                     localX++;
-                    currentPos.move(1, -8, 0);
+                    currentPos.move(stepX, -stepBit * 8, 0);
                     if (localX >= sizeX) {
                         localX = 0;
                         localZ++;
                         currentPos.setX(position.getX());
-                        currentPos.move(0, 0, 1);
+                        currentPos.move(0, 0, stepZ);
 
                         if (localZ >= sizeZ) {
                             localZ = 0;
                             localY++;
                             currentPos.setZ(position.getZ());
-                            currentPos.move(0, yStep, 0);
-                            if (currentPos.getY() + yStep > 320) {
+                            currentPos.move(0, stepY, 0);
+                            if (currentPos.getY() + stepY > 320) {
                                 onDoneNormally(Result.CUT_BY_WORLD_EDGE);
                                 return;
                             }
