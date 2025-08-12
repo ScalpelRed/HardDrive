@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class HardDrive implements ModInitializer {
 
     public final Logger logger = LoggerFactory.getLogger("harddrive");
@@ -14,13 +16,21 @@ public class HardDrive implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-
-		String spl = "Megabytes of information!";
-		if (Math.random() < 0.95) spl = "Yowza! " + spl;
-		else spl = "oOwOo " + spl;
-		logger.info(spl);
+		logger.info("{} Megabytes of information!", (Math.random() < 0.95) ? "Yowza!" : "oOwOo");
 
 		config.loadOrCreate();
+		try {
+			IOManager.createInputDirIfNeeded();
+		}
+		catch (IOException e) {
+			logger.error("Failed to create input dir: {}", e.getMessage());
+		}
+		try {
+			IOManager.createOutputDirIfNeeded();
+		}
+		catch (IOException e) {
+			logger.error("Failed to create output dir: {}", e.getMessage());
+		}
 		new HardDriveCommand(this);
 		new WriteToWorldCommand(this);
 		new ReadFromWorldCommand(this);

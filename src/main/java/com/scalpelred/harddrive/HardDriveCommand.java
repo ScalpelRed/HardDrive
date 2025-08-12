@@ -171,6 +171,11 @@ public class HardDriveCommand {
         EMBED_LENGTH,
         BLOCK_ZERO,
         BLOCK_ONE,
-        LAYER_SPACING
+        LAYER_SPACING,
+
+        ALLOW_ANY_PATH,
+        COMMANDS_PERMISSION_LEVEL,
+        BYTES_PER_TICK_WRITE,
+        BYTES_PER_TICK_READ
     }
 }

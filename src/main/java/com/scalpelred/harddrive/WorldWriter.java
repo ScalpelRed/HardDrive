@@ -196,7 +196,7 @@ public class WorldWriter implements IIOWorker {
             working = false;
             try {
                 fileStream.close();
-            } catch (IOException ignored) {
+            } catch (Exception ignored) {
             }
             switch (res) {
                 case SUCCESS:
@@ -213,6 +213,9 @@ public class WorldWriter implements IIOWorker {
                     break;
                 case INTERRUPTED:
                     sendFeedback("Writing interrupted manually.");
+                    break;
+                default:
+                    sendFeedback("Reading stopped for unknown reason.");
                     break;
             }
         }

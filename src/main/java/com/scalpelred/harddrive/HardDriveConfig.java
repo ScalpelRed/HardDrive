@@ -17,7 +17,6 @@ public class HardDriveConfig extends Config {
             "size_y", Integer.class, 4, "Number of Y layers");
 
     public SimpleConfigEntry<Boolean> embedLength = new SimpleConfigEntry<>(this,
-            "append_length", Boolean.class, true, "Add file length at the beginning");
 
     public SimpleConfigEntry<Integer> layerSpacing = new SimpleConfigEntry<>(this,
             "layer_spacing", Integer.class, 1, "Amount of blocks to add between Y layers");

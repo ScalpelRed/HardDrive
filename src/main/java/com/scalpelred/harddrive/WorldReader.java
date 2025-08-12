@@ -150,6 +150,7 @@ public class WorldReader implements IIOWorker {
                 onDoneNormally(Result.NEGATIVE_EMBEDDED_LENGTH);
                 return;
             }
+            fileStream = new FileOutputStream(file);
             working = true;
         }
     }
@@ -239,8 +240,7 @@ public class WorldReader implements IIOWorker {
             working = false;
             try {
                 fileStream.close();
-            } catch (IOException ignored) {
-            }
+            } catch (Exception ignored) { }
             switch (res) {
                 case SUCCESS:
                     sendFeedback("Reading done.");
@@ -248,11 +248,20 @@ public class WorldReader implements IIOWorker {
                 case NOT_ENOUGH_SPACE:
                     sendFeedback("ERROR: There's not enough space in the area, written as much as possible.");
                     break;
+                case NEGATIVE_EMBEDDED_LENGTH:
+                    sendFeedback("ERROR: Embedded length is negative.");
+                    break;
+                case NO_ANY_LENGTH:
+                    sendFeedback("ERROR: No length provided, specify it as an argument or use embedded length.");
+                    break;
                 case CUT_BY_WORLD_EDGE:
                     sendFeedback("ERROR: World border was reached while reading the file.");
                     break;
                 case INTERRUPTED:
                     sendFeedback("Reading interrupted manually.");
+                    break;
+                default:
+                    sendFeedback("Reading stopped for unknown reason.");
                     break;
             }
         }
